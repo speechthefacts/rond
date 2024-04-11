@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bacs à fleurs ronds avec paiement Stripe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100px;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        select {
+            width: 120px;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #8a2be2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #9932cc;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bacs à fleurs ronds avec paiement Stripe</h1>
+    <label for="diametre">Diamètre (mm) :</label>
+    <input type="number" id="diametre" min="0" value="500">
+    <label for="hauteur">Hauteur (mm) :</label>
+    <input type="number" id="hauteur" min="0" value="200">
+    <label for="quantity">Quantité :</label>
+    <select id="quantity">
+    </select>
+    <label>
+        <input type="checkbox" id="avecPieds" onclick="checkboxClicked(this)">
+        Avec pieds 10 cm : + 10 euros TTC
+    </label>
+    <label>
+        <input type="checkbox" id="avecRoulettes" onclick="checkboxClicked(this)">
+        Avec roulettes : + 90 euros TTC
+    </label>
+    <button onclick="calculerMontant()">Calculer Montant</button>
+    <div id="result"></div>
+    <button id="checkout-button" style="display: none;">Payer maintenant</button>
+
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        // Initialisez Stripe avec votre clé publique
+        var stripe = Stripe('pk_test_51OVBbFH0S2ts1MYetfq0WBHoT1IsqtvZyq89CxNLVnK1yDq2rwSbIxqqEcfQ37qoSNi4yKDC8tLHPttJXiRnkt2v004uFHTjW5');
+
+        function generateQuantityOptions() {
+            var quantitySelect = document.getElementById("quantity");
+            quantitySelect.innerHTML = "";
+            
+            for (var i = 1; i <= 100; i++) {
+                var option = document.createElement("option");
+                option.value = i;
+                option.textContent = i;
+                quantitySelect.appendChild(option);
+            }
+        }
+
+        generateQuantityOptions();
+
+        function calculerMontant() {
+            var diametre = parseFloat(document.getElementById('diametre').value) / 1000; // Conversion en mètres
+            var hauteur = parseFloat(document.getElementById('hauteur').value) / 1000; // Conversion en mètres
+            
+            // Calcul de la surface du fond (cercle)
+            var rayon = diametre / 2; // Rayon du cercle
+            var surfaceFond = Math.PI * Math.pow(rayon, 2);
+            
+            // Calcul de la surface latérale du cylindre
+            var circonference = Math.PI * diametre; // Circonférence du cercle (circonférence du fond)
+            var surfaceLaterale = circonference * hauteur; // Surface latérale du cylindre
+
+            // Calcul de la surface totale
+            var surfaceTotale = surfaceFond + surfaceLaterale;
+            
+            // Poids en kg
+            var poids = surfaceTotale * 16;
+            
+            // Prix de base en euros
+            var prix = poids * 13;
+            
+            // Ajout des coûts supplémentaires si les cases sont cochées
+            var quantity = parseInt(document.getElementById('quantity').value);
+            if (document.getElementById('avecPieds').checked) {
+                prix += 10 * quantity;
+            }
+            if (document.getElementById('avecRoulettes').checked) {
+                prix += 90 * quantity;
+            }
+            
+            // Afficher le montant calculé
+            document.getElementById('result').innerHTML = "<strong>Montant à payer :</strong> " + (prix * quantity).toFixed(2) + " euros";
+
+            // Affichez le bouton de paiement si le montant est valide
+            if (prix > 0) {
+                document.getElementById('checkout-button').style.display = 'block';
+            } else {
+                document.getElementById('checkout-button').style.display = 'none';
+            }
+        }
+
+        function checkboxClicked(clickedCheckbox) {
+            if (clickedCheckbox.id === 'avecPieds' && clickedCheckbox.checked) {
+                document.getElementById('avecRoulettes').checked = false;
+            } else if (clickedCheckbox.id === 'avecRoulettes' && clickedCheckbox.checked) {
+                document.getElementById('avecPieds').checked = false;
+            }
+        }
+
+        // Créez un gestionnaire d'événements pour le clic sur le bouton de paiement
+        document.getElementById('checkout-button').addEventListener('click', function() {
+            // Récupérez le montant à payer
+            var montant = parseFloat(document.getElementById('result').innerText.split(':')[1].trim()) * 100; // Convertir en centimes
+
+            // Créez une session de paiement avec Stripe
+            fetch('/create-checkout-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    montant: montant
+                })
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(session) {
+                // Redirigez l'utilisateur vers la page de paiement Stripe
+                return stripe.redirectToCheckout({ sessionId: session.id });
+            })
+            .then(function(result) {
+                // Gérez la réponse de Stripe après le paiement
+                if (result.error) {
+                    console.error(result.error.message);
+                    // Afficher un message d'erreur à l'utilisateur en cas d'échec du paiement
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
