@@ -8,7 +8,12 @@ const stripe = require('stripe')('sk_test_51OVBbFH0S2ts1MYe41bcBxWgthbhitxF0cr1g
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 
-// Routes
+// Route pour servir votre page HTML
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'bac rond.html'));
+});
+
+// Route pour le traitement des paiements avec Stripe
 app.post('/create-checkout-session', async (req, res) => {
     try {
         const session = await stripe.checkout.sessions.create({
@@ -28,6 +33,14 @@ app.post('/create-checkout-session', async (req, res) => {
             mode: 'payment',
             success_url: 'https://a-scoria.fr/success-payement', // URL de redirection après un paiement réussi
             cancel_url: 'https://a-scoria.fr/cancel-payement', // URL de redirection après l'annulation du paiement
+            shipping_address_collection: {
+                allowed_countries: ['FR'], // Définissez les pays autorisés pour l'adresse de livraison
+            },
+            shipping: {
+                address: {
+                    line1: req.body.adresseLivraison, // Utilisez l'adresse de livraison fournie dans la requête
+                },
+            },
         });
         res.json({ id: session.id });
     } catch (err) {
