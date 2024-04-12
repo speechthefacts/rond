@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 
 // Route pour servir votre page HTML
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'bac_rond.html'));
+    res.sendFile(path.join(__dirname, 'bac rond.html'));
 });
 
 // Route pour le traitement des paiements avec Stripe
