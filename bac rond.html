@@ -140,6 +140,12 @@
             } else {
                 document.getElementById('checkout-button').style.display = 'none';
             }
+
+            // Récupérer le montant total en centimes pour Stripe
+            var montant = Math.round(prix * 100);
+
+            // Stocker le montant dans un champ caché pour l'utiliser lors du paiement
+            document.getElementById('montant').value = montant;
         }
 
         function checkboxClicked(clickedCheckbox) {
@@ -153,7 +159,7 @@
         // Créez un gestionnaire d'événements pour le clic sur le bouton de paiement
         document.getElementById('checkout-button').addEventListener('click', function() {
             // Récupérez le montant à payer
-            var montant = parseFloat(document.getElementById('result').innerText.split(':')[1].trim()) * 100; // Convertir en centimes
+            var montant = document.getElementById('montant').value;
 
             // Créez une session de paiement avec Stripe
             fetch('/create-checkout-session', {
@@ -186,4 +192,3 @@
     </script>
 </body>
 </html>
-
