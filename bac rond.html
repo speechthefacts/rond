@@ -125,14 +125,14 @@
             // Ajout des coûts supplémentaires si les cases sont cochées
             var quantity = parseInt(document.getElementById('quantity').value);
             if (document.getElementById('avecPieds').checked) {
-                prix += 10 * quantity;
+                prix += 10;
             }
             if (document.getElementById('avecRoulettes').checked) {
-                prix += 90 * quantity;
+                prix += 90;
             }
             
             // Afficher le montant calculé
-            document.getElementById('result').innerHTML = "<strong>Montant à payer :</strong> " + (prix * quantity).toFixed(2) + " euros";
+            document.getElementById('result').innerHTML = "<strong>Montant à payer :</strong> " + prix.toFixed(2) + " euros";
 
             // Affichez le bouton de paiement si le montant est valide
             if (prix > 0) {
@@ -162,9 +162,7 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    montant: montant,
-                    diametre: diametre, // Ajout du diamètre à la requête
-                    hauteur: hauteur // Ajout de la hauteur à la requête
+                    montant: montant
                 })
             })
             .then(function(response) {
