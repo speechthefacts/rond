@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bacs à fleurs rondS</title>
+    <title>Bacs à fleurs ronds</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -96,11 +96,11 @@
         generateQuantityOptions();
 
         function calculerMontant() {
-            var diametre = parseFloat(document.getElementById('diametre').value) / 1000; // Conversion en mètres
-            var hauteur = parseFloat(document.getElementById('hauteur').value) / 1000; // Conversion en mètres
+            var diametre = parseFloat(document.getElementById('diametre').value); // Conserver la valeur en millimètres
+            var hauteur = parseFloat(document.getElementById('hauteur').value); // Conserver la valeur en millimètres
             
             // Vérifier si les dimensions sont dans les limites spécifiées
-            if (diametre < 0.3 || diametre > 1.2 || hauteur < 0.2 || hauteur > 1.2) {
+            if (diametre < 300 || diametre > 1200 || hauteur < 200 || hauteur > 1200) {
                 alert("Les dimensions doivent être comprises entre 300mm et 1200mm pour le diamètre, et entre 200mm et 1200mm pour la hauteur.");
                 return;
             }
@@ -162,7 +162,9 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    montant: montant
+                    montant: montant,
+                    diametre: diametre, // Ajout du diamètre à la requête
+                    hauteur: hauteur // Ajout de la hauteur à la requête
                 })
             })
             .then(function(response) {
