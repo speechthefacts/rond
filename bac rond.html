@@ -165,7 +165,9 @@
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                montant: montant
+                montant: montant,
+                diametre: parseFloat(document.getElementById('diametre').value), // Ajouter le diamètre
+                hauteur: parseFloat(document.getElementById('hauteur').value) // Ajouter la hauteur
             })
         })
         .then(function(response) {
@@ -185,4 +187,5 @@
     });
 </script>
 </html>
+
 
