@@ -36,6 +36,11 @@ app.post('/create-checkout-session', async (req, res) => {
             shipping_address_collection: {
                 allowed_countries: ['FR'], // Définissez les pays autorisés pour l'adresse de livraison
             },
+            shipping: {
+                address: {
+                    line1: req.body.adresseLivraison, // Utilisez l'adresse de livraison fournie dans la requête
+                },
+            },
             metadata: {
                 diametre: req.body.diametre, // Récupération du diamètre depuis le corps de la requête
                 hauteur: req.body.hauteur // Récupération de la hauteur depuis le corps de la requête
