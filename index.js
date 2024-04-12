@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const bodyParser = require('body-parser');
-const stripe = require('stripe')('sk_test_51OVBbFH0S2ts1MYe41bcBxWgthbhitxF0cr1gxtlGjfEF48HIUMC3RtrtTAvQcuaBxdAIWe0fSsRxMtA29sy16hS00aiDfmOJ1');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Middleware
 app.use(express.static(path.join(__dirname, 'public')));
@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 
 // Route pour servir votre page HTML
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'bac rond.html'));
+    res.sendFile(path.join(__dirname, 'bac_rond.html'));
 });
 
 // Route pour le traitement des paiements avec Stripe
@@ -41,6 +41,10 @@ app.post('/create-checkout-session', async (req, res) => {
                     line1: req.body.adresseLivraison, // Utilisez l'adresse de livraison fournie dans la requête
                 },
             },
+            metadata: {
+                diametre: req.body.diametre, // Récupération du diamètre depuis le corps de la requête
+                hauteur: req.body.hauteur // Récupération de la hauteur depuis le corps de la requête
+            },
         });
         res.json({ id: session.id });
     } catch (err) {
@@ -53,3 +57,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
