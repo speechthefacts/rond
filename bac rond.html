@@ -63,10 +63,10 @@
 </head>
 <body>
     <h1>Bacs à fleurs ronds</h1>
-    <label for="diametre">Diamètre (mm) :</label>
-    <input type="number" id="diametre" min="300" max="1200" value="500">
-    <label for="hauteur">Hauteur (mm) :</label>
-    <input type="number" id="hauteur" min="200" max="1200" value="200">
+    <label for="diametre">Diamètre (cm) :</label>
+    <input type="number" id="diametre" min="30" max="120" value="50">
+    <label for="hauteur">Hauteur (cm) :</label>
+    <input type="number" id="hauteur" min="20" max="120" value="20">
     <label for="quantity">Quantité :</label>
     <select id="quantity"></select>
     <label>
@@ -76,6 +76,14 @@
     <label>
         <input type="checkbox" id="avecRoulettes" onclick="checkboxClicked(this)">
         Avec roulettes : + 90 euros TTC
+    </label>
+    <label>
+        <input type="checkbox" id="livraison" onclick="checkboxLivraison(this)">
+        Livraison à domicile : + 100 euros TTC
+    </label>
+    <label>
+        <input type="checkbox" id="retrait" onclick="checkboxLivraison(this)">
+        Retrait à l'atelier
     </label>
     <button onclick="calculerMontant()">Calculer Montant</button>
     <div id="result"></div>
@@ -99,11 +107,11 @@
         generateQuantityOptions();
 
         function calculerMontant() {
-            var diametre = parseFloat(document.getElementById('diametre').value) / 1000;
-            var hauteur = parseFloat(document.getElementById('hauteur').value) / 1000;
+            var diametre = parseFloat(document.getElementById('diametre').value) / 100;
+            var hauteur = parseFloat(document.getElementById('hauteur').value) / 100;
             
             if (diametre < 0.3 || diametre > 1.2 || hauteur < 0.2 || hauteur > 1.2) {
-                alert("Les dimensions doivent être comprises entre 300mm et 1200mm pour le diamètre, et entre 200mm et 1200mm pour la hauteur.");
+                alert("Les dimensions doivent être comprises entre 30cm et 120cm pour le diamètre, et entre 20cm et 120cm pour la hauteur.");
                 return;
             }
             
@@ -130,6 +138,9 @@
             if (document.getElementById('avecRoulettes').checked) {
                 prix += 90 * quantity;
             }
+            if (document.getElementById('livraison').checked) {
+                prix += 100;
+            }
 
             return prix * quantity;
         }
@@ -142,6 +153,14 @@
             }
         }
 
+        function checkboxLivraison(clickedCheckbox) {
+            if (clickedCheckbox.id === 'livraison' && clickedCheckbox.checked) {
+                document.getElementById('retrait').checked = false;
+            } else if (clickedCheckbox.id === 'retrait' && clickedCheckbox.checked) {
+                document.getElementById('livraison').checked = false;
+            }
+        }
+
         document.getElementById('checkout-button').addEventListener('click', function() {
             var montant = parseFloat(document.getElementById('result').innerText.split(':')[1].trim()) * 100;
 
@@ -151,12 +170,15 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
+                    type: "bac_rond",
                     montant: montant,
                     diametre: parseFloat(document.getElementById('diametre').value),
                     hauteur: parseFloat(document.getElementById('hauteur').value),
                     quantity: parseInt(document.getElementById('quantity').value),
                     avecPieds: document.getElementById('avecPieds').checked,
-                    avecRoulettes: document.getElementById('avecRoulettes').checked
+                    avecRoulettes: document.getElementById('avecRoulettes').checked,
+                    livraison: document.getElementById('livraison').checked,
+                    retrait: document.getElementById('retrait').checked
                 })
             })
             .then(function(response) {
@@ -177,6 +199,7 @@
     </script>
 </body>
 </html>
+
 
 
 
