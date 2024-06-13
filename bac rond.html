@@ -138,11 +138,14 @@
             if (document.getElementById('avecRoulettes').checked) {
                 prix += 90 * quantity;
             }
+
+            prix *= quantity;
+
             if (document.getElementById('livraison').checked) {
                 prix += 100;
             }
 
-            return prix * quantity;
+            return prix;
         }
 
         function checkboxClicked(clickedCheckbox) {
@@ -199,6 +202,7 @@
     </script>
 </body>
 </html>
+
 
 
 
