@@ -36,6 +36,8 @@ app.post('/create-checkout-session', async (req, res) => {
             metadata: { // Ajoutez les métadonnées ici
                 diametre: req.body.diametre, // Récupération du diamètre depuis le corps de la requête
                 hauteur: req.body.hauteur, // Récupération de la hauteur depuis le corps de la requête
+                livraison : req.body.livraison,
+                retrait : req.body.retrait,
             },
             shipping_address_collection: {
                 allowed_countries: ['FR'], // Définissez les pays autorisés pour l'adresse de livraison
